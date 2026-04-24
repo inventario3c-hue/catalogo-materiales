@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Productos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --text: #1a1916;
+    --text-muted: #7a7870;
+    --accent: #2a5c45;
+    --accent-light: #e8f0ec;
+    --accent-hover: #1e4433;
+    --danger: #c0392b;
+    --danger-light: #fdf0ee;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  #auth-btn {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  #auth-btn:hover { background: var(--accent-hover); }
+  #user-info { font-size: 13px; color: var(--text-muted); }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .status-pill.ok { background: var(--accent-light); color: var(--accent); border-color: #b5d0c0; }
+  .status-pill.err { background: var(--danger-light); color: var(--danger); border-color: #f0b8b3; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 28px 20px; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: 24px;
+    width: fit-content;
+  }
+  .tab {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+  .count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.25);
+    border-radius: 99px;
+    font-size: 11px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: 6px;
+  }
+  .tab:not(.active) .count-badge {
+    background: var(--bg);
+    color: var(--text-muted);
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    max-width: 520px;
+  }
+  .photo-area {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-lg);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .photo-area:hover { border-color: var(--accent); background: var(--accent-light); }
+  .photo-area img { width: 100%; height: 220px; object-fit: cover; }
+  .photo-icon {
+    width: 44px; height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .photo-label { font-size: 14px; color: var(--text-muted); }
+  .photo-sub { font-size: 12px; color: #aaa8a0; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+  .field input, .field textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: border-color 0.15s;
+    outline: none;
+    resize: none;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); background: #fff; }
+  .field input[type=number] { font-family: 'DM Mono', monospace; }
+
+  .save-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .save-btn:hover { background: var(--accent-hover); }
+  .save-btn:active { transform: scale(0.98); }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .product-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+  .product-thumb { width: 100%; height: 150px; object-fit: cover; display: block; background: var(--bg); }
+  .product-thumb.no-img {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: var(--border);
+  }
+  .product-body { padding: 12px 14px; }
+  .product-sku {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 2px 7px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .product-desc {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .product-stock { font-size: 12px; color: var(--text-muted); }
+  .product-stock strong { color: var(--text); font-weight: 600; }
+  .product-date { font-size: 11px; color: #bbb8b0; margin-top: 4px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 0;
+    color: var(--text-muted);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 15px; }
+  .empty-state small { font-size: 13px; color: #bbb; }
+
+  .loading-state { text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 14px; }
+
+  .blocked-msg {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px 28px;
+    text-align: center;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .blocked-msg h3 { font-size: 17px; margin-bottom: 8px; }
+  .blocked-msg p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  @media (max-width: 600px) {
+    main { padding: 20px 14px; }
+    .form-card { padding: 20px; }
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Catálogo <span>Productos</span></div>
+  <div class="header-right">
+    <div class="status-pill" id="status-pill">
+      <span class="dot"></span>
+      <span id="status-text">Iniciando...</span>
+    </div>
+    <div id="user-info"></div>
+    <button id="auth-btn" onclick="handleAuth()" style="display:none;">Iniciar sesión</button>
+  </div>
+</header>
+
+<main>
+  <div id="blocked-ui" class="blocked-msg" style="display:none;">
+    <div style="font-size:36px;margin-bottom:14px;">🔐</div>
+    <h3>Inicia sesión para continuar</h3>
+    <p>Haz clic en el botón "Iniciar sesión" arriba para conectar con tu cuenta de Google y acceder al catálogo.</p>
+  </div>
+
+  <div id="app-ui" style="display:none;">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('agregar')">Agregar producto</button>
+      <button class="tab" onclick="showTab('catalogo'); loadProducts()">
+        Catálogo <span class="count-badge" id="count">0</span>
+      </button>
+    </div>
+
+    <div class="section active" id="tab-agregar">
+      <div class="form-card">
+        <div class="photo-area" id="photo-area" onclick="document.getElementById('file-input').click()">
+          <div class="photo-icon">📷</div>
+          <div class="photo-label">Toca para agregar foto</div>
+          <div class="photo-sub">JPG, PNG, WEBP</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handlePhoto(event)" style="display:none;">
+
+        <div class="field">
+          <label>Código / SKU</label>
+          <input type="text" id="sku" placeholder="Ej: PROD-001">
+        </div>
+        <div class="field">
+          <label>Descripción</label>
+          <textarea id="desc" rows="3" placeholder="Describe el producto..."></textarea>
+        </div>
+        <div class="field">
+          <label>Stock / Cantidad</label>
+          <input type="number" id="stock" placeholder="Ej: 50" min="0">
+        </div>
+        <button class="save-btn" id="save-btn" onclick="saveProduct()">Guardar producto</button>
+      </div>
+    </div>
+
+    <div class="section" id="tab-catalogo">
+      <div id="product-list"><div class="loading-state">Cargando productos...</div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const CLIENT_ID = '779615531448-i5u1tm13i4djidhu7vnoc85ia1apul1f.apps.googleusercontent.com';
+const FOLDER_ID = '1I8oflutkgR8RO2FQRNpsmBUIrB3eKFtl';
+const SHEET_ID  = '1FrwwYQ5oW0DwZDFrBAdfVEIBAuiGI6Cgf-IwjPBtUKk';
+const SCOPES    = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/spreadsheets';
+
+let currentPhotoFile = null;
+let tokenClient = null;
+let gapiReady = false;
+let gisReady = false;
+
+function setStatus(msg, type) {
+  const pill = document.getElementById('status-pill');
+  pill.className = 'status-pill' + (type ? ' ' + type : '');
+  document.getElementById('status-text').textContent = msg;
+}
+
+function gapiLoaded() {
+  gapi.load('client', async () => {
+    await gapi.client.init({
+      discoveryDocs: [
+        'https://sheets.googleapis.com/$discovery/rest?version=v4',
+        'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
+      ]
+    });
+    gapiReady = true;
+    maybeReady();
+  });
+}
+
+function gisLoaded() {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: async (resp) => {
+      if (resp.error) { setStatus('Error: ' + resp.error, 'err'); return; }
+      const profile = parseJwt(resp.access_token);
+      setStatus('Conectado', 'ok');
+      document.getElementById('auth-btn').textContent = 'Cerrar sesión';
+      document.getElementById('blocked-ui').style.display = 'none';
+      document.getElementById('app-ui').style.display = 'block';
+      await ensureSheetHeaders();
+    }
+  });
+  gisReady = true;
+  maybeReady();
+}
+
+function maybeReady() {
+  if (gapiReady && gisReady) {
+    setStatus('Listo');
+    document.getElementById('auth-btn').style.display = 'inline-block';
+    document.getElementById('blocked-ui').style.display = 'block';
+  }
+}
+
+function parseJwt(token) {
+  try { return JSON.parse(atob(token.split('.')[1])); } catch(e) { return {}; }
+}
+
+function handleAuth() {
+  if (gapi.client.getToken()) {
+    google.accounts.oauth2.revoke(gapi.client.getToken().access_token);
+    gapi.client.setToken(null);
+    setStatus('Sesión cerrada');
+    document.getElementById('auth-btn').textContent = 'Iniciar sesión';
+    document.getElementById('app-ui').style.display = 'none';
+    document.getElementById('blocked-ui').style.display = 'block';
+  } else {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
+}
+
+async function ensureSheetHeaders() {
+  try {
+    const r = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'A1:E1' });
+    const vals = r.result.values;
+    if (!vals || !vals[0] || vals[0][0] !== 'SKU') {
+      await gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId: SHEET_ID, range: 'A1:E1', valueInputOption: 'RAW',
+        resource: { values: [['SKU','Descripción','Stock','URL Foto','Fecha']] }
+      });
+    }
+    await loadProducts();
+  } catch(e) { setStatus('Error hoja: ' + e.message, 'err'); }
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', (i===0 && tab==='agregar') || (i===1 && tab==='catalogo'))
+  );
+  document.getElementById('tab-agregar').classList.toggle('active', tab==='agregar');
+  document.getElementById('tab-catalogo').classList.toggle('active', tab==='catalogo');
+}
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  currentPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('photo-area').innerHTML =
+      '<img src="' + ev.target.result + '" style="width:100%;height:220px;object-fit:cover;">';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadPhoto(file) {
+  const token = gapi.client.getToken().access_token;
+  const meta = { name: Date.now() + '_' + file.name, parents: [FOLDER_ID] };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+  form.append('file', file);
+  const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token },
+    body: form
+  });
+  const data = await res.json();
+  await fetch('https://www.googleapis.com/drive/v3/files/' + data.id + '/permissions', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role: 'reader', type: 'anyone' })
+  });
+  return 'https://drive.google.com/thumbnail?id=' + data.id + '&sz=w400';
+}
+
+async function saveProduct() {
+  const sku   = document.getElementById('sku').value.trim();
+  const desc  = document.getElementById('desc').value.trim();
+  const stock = document.getElementById('stock').value.trim();
+  if (!sku && !desc) { alert('Ingresa al menos el código o la descripción.'); return; }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  setStatus('Guardando...', '');
+
+  try {
+    let photoUrl = '';
+    if (currentPhotoFile) {
+      btn.textContent = 'Subiendo foto...';
+      photoUrl = await uploadPhoto(currentPhotoFile);
+    }
+    await gapi.client.sheets.spreadsheets.values.append({
+      spreadsheetId: SHEET_ID, range: 'A:E', valueInputOption: 'RAW',
+      resource: { values: [[sku, desc, stock, photoUrl, new Date().toLocaleDateString('es-CL')]] }
+    });
+    setStatus('Guardado', 'ok');
+    document.getElementById('sku').value = '';
+    document.getElementById('desc').value = '';
+    document.getElementById('stock').value = '';
+    currentPhotoFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('photo-area').innerHTML =
+      '<div class="photo-icon">📷</div><div class="photo-label">Toca para agregar foto</div><div class="photo-sub">JPG, PNG, WEBP</div>';
+    loadProducts();
+  } catch(e) { setStatus('Error: ' + e.message, 'err'); }
+
+  btn.disabled = false; btn.textContent = 'Guardar producto';
+}
+
+async function loadProducts() {
+  const el = document.getElementById('product-list');
+  el.innerHTML = '<div class="loading-state">Cargando productos...</div>';
+  try {
+    const r = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: 'A2:E1000' });
+    const rows = (r.result.values || []).reverse();
+    document.getElementById('count').textContent = rows.length;
+    if (!rows.length) {
+      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>Aún no hay productos</p><small>Agrega tu primer producto en la pestaña anterior</small></div>';
+      return;
+    }
+    el.innerHTML = '<div class="product-grid">' + rows.map(row => {
+      const [sku, desc, stock, photo, fecha] = row;
+      return '<div class="product-card">' +
+        (photo
+          ? '<img class="product-thumb" src="' + photo + '" alt="foto del producto" onerror="this.className=\'product-thumb no-img\';this.outerHTML=\'<div class=&quot;product-thumb no-img&quot;>📦</div>\'">'
+          : '<div class="product-thumb no-img">📦</div>') +
+        '<div class="product-body">' +
+        (sku   ? '<div class="product-sku">' + sku + '</div>' : '') +
+        (desc  ? '<div class="product-desc">' + desc + '</div>' : '') +
+        (stock ? '<div class="product-stock">Stock: <strong>' + stock + '</strong></div>' : '') +
+        (fecha ? '<div class="product-date">' + fecha + '</div>' : '') +
+        '</div></div>';
+    }).join('') + '</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="empty-state"><p>Error al cargar: ' + e.message + '</p></div>';
+  }
+}
+
+(function loadScripts() {
+  const g = document.createElement('script');
+  g.src = 'https://apis.google.com/js/api.js';
+  g.onload = gapiLoaded;
+  document.head.appendChild(g);
+  const gi = document.createElement('script');
+  gi.src = 'https://accounts.google.com/gsi/client';
+  gi.onload = gisLoaded;
+  document.head.appendChild(gi);
+})();
+</script>
+</body>
+</html>
